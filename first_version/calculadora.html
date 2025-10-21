@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="./cal.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js"></script>
+</head>
+
+<body>
+  <main class="calculadora">
+    <input id="displayBox" type="text" readonly>
+
+    <div class="fila">
+      <button class="boton_Accion" onclick="calculadora.cal_Porcentaje()">%</button>
+      <button class="boton_Accion" onclick="calculadora.borrar_Pantalla()">C</button>
+      <button class="boton_Borrar" onclick="calculadora.borrar_Numero()">⌫</button>
+    </div>
+
+    <div class="fila">
+      <button class="boton_Accion" onclick="calculadora.inversor()">⅟x</button>
+      <button class="boton_Accion" onclick="calculadora.elevacion_Cuadrado()">x²</button>
+      <button class="boton_Accion" onclick="calculadora.obtener_Raiz()">&sup2;&#8730;x</button>
+      <button class="boton_Accion" onclick="calculadora.division()">÷</button>
+    </div>
+
+    <div class="fila">
+      <button class="boton_Numero" onclick="calculadora.escribe('7')">7</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('8')">8</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('9')">9</button>
+      <button class="boton_Accion" onclick="calculadora.multiplicacion()">×</button>
+    </div>
+
+    <div class="fila">
+      <button class="boton_Numero" onclick="calculadora.escribe('4')">4</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('5')">5</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('6')">6</button>
+      <button class="boton_Accion" onclick="calculadora.restar()">−</button>
+    </div>
+
+    <div class="fila">
+      <button class="boton_Numero" onclick="calculadora.escribe('1')">1</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('2')">2</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('3')">3</button>
+      <button class="boton_Accion" onclick="calculadora.suma()">+</button>
+
+    </div>
+
+    <div class="fila">
+      <button class="boton_Numero" onclick="calculadora.invertir_signo()">&plusmn;</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('0')">0</button>
+      <button class="boton_Numero" onclick="calculadora.escribe('.')">.</button>
+      <button class="boton_Resultado" onclick="calculadora.resultado()">=</button>
+    </div>
+  </main>
+</body>
+</html>

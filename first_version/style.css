@@ -1,0 +1,81 @@
+body {
+  background: #565353;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.calculadora {
+  background-color: #241e20 ;
+  padding: 6px;
+  border-radius: 8px;
+  width: 380px;
+  height: 480px;
+}
+
+#displayBox {
+  width: 373px;
+  height: 70px;
+  background-color: transparent;
+  color: white;
+  font-size: 55px;
+  text-align: right;
+  margin-bottom: 5px;
+  border: none;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+}
+
+button {
+  height: 65px;
+  border: none;
+  border-radius: 3px;
+  font-size: 25px;
+  box-sizing: border-box;
+  margin: 1px;
+  margin-left: 0px;
+  color: white;
+}
+
+.boton_Accion{
+  background-color: #362e32;
+}
+
+.boton_Borrar{
+  background-color: #362e32;
+}
+
+.boton_Numero{
+  background-color: #625a5c;
+}
+
+.boton_Resultado{
+  background-color: #dbb09c;
+  color: black;
+}
+
+.fila:first-of-type button:nth-child(1) {
+  grid-column: 1;
+}
+.fila:first-of-type button:nth-child(2) {
+  grid-column: 2;
+}
+.fila:first-of-type button:nth-child(3) {
+  grid-column: 3 / span 2;
+  font-size: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.boton_Accion:hover,
+.boton_Borrar:hover,
+.boton_Numero:hover,
+.boton_Resultado:hover {
+  filter: brightness(1.2);
+}
