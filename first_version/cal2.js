@@ -4,6 +4,47 @@ const calculadora = {
   operacion: null,
   nuevoNumero: false,
 
+init() {
+  const display = this.display;
+
+   display.addEventListener("beforeinput", (e) => {
+    const data = e.data;
+    const valor = display.value;
+    const ultimo = valor.slice(-1);
+
+     const especiales = ["deleteContentBackward", "deleteContentForward"];
+    if (!data && !especiales.includes(e.inputType)) return;
+
+     if (e.inputType === "insertLineBreak") {
+      e.preventDefault();
+      this.resultado();
+      return;
+    }
+
+     const permitido = /[0-9+\-x÷*/.%]/.test(data);
+    if (!permitido && !especiales.includes(e.inputType)) {
+      e.preventDefault();
+      return;
+    }
+
+     if (/[+\-x÷*/]/.test(data) && /[+\-x÷*/]/.test(ultimo)) {
+      e.preventDefault();  
+      display.value = valor.slice(0, -1) + data;
+       display.setSelectionRange(display.value.length, display.value.length);
+      display.scrollLeft = display.scrollWidth;
+      return;
+    }
+  });
+
+  display.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.resultado();
+    }
+  });
+},
+
+
   escribe(valor) {
     const display = this.display;
     let start = display.selectionStart;
@@ -15,17 +56,19 @@ const calculadora = {
       start = end = 0;
     }
 
-    if (this.nuevoNumero && /[+\-x÷*/]/.test(texto.slice(-1)) === false) {
+    if (this.nuevoNumero && /\d/.test(valor)) {
       texto = "";
       start = end = 0;
       this.nuevoNumero = false;
     }
 
     const nuevoTexto = texto.slice(0, start) + valor + texto.slice(end);
-    display.value = nuevoTexto;
-
     const nuevaPos = start + valor.length;
+
+    const scrollPrev = display.scrollLeft;
+    display.value = nuevoTexto;
     display.setSelectionRange(nuevaPos, nuevaPos);
+    display.scrollLeft = scrollPrev > 0 ? scrollPrev : display.scrollWidth;
     display.focus();
   },
 
@@ -50,7 +93,7 @@ const calculadora = {
     if (start !== end) {
       display.value = texto.slice(0, start) + texto.slice(end);
       display.setSelectionRange(start, start);
-    } else if (start > "") {
+    } else if (start > 0) {
       display.value = texto.slice(0, start - 1) + texto.slice(end);
       display.setSelectionRange(start - 1, start - 1);
     }
@@ -60,19 +103,17 @@ const calculadora = {
 
   cal_Porcentaje() {
     const valor = this.display.value;
-    if (valor.includes("%")) return;
-    this.display.value += "%";
-    this.display.focus();
+    if (!valor.endsWith("%")) {
+      this.display.value += "%";
+      this.display.focus();
+    }
   },
 
   inversor() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
     const num = parseFloat(match[1]);
-    if (num === 0) {
-      this.display.value = "Error";
-      return;
-    }
+    if (num === 0) return (this.display.value = "Error");
     const resultado = 1 / num;
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
@@ -89,10 +130,7 @@ const calculadora = {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
     const num = parseFloat(match[1]);
-    if (num < 0) {
-      this.display.value = "Error";
-      return;
-    }
+    if (num < 0) return (this.display.value = "Error");
     const resultado = Math.sqrt(num);
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
@@ -105,30 +143,13 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
-  suma() {
-    this.verificarError();
-    this.agregarOperacion("+");
-  },
-
-  restar() {
-    this.verificarError();
-    this.agregarOperacion("-");
-  },
-
-  multiplicacion() {
-    this.verificarError();
-    this.agregarOperacion("x");
-  },
-
-  division() {
-    this.verificarError();
-    this.agregarOperacion("÷");
-  },
+  suma() { this.verificarError(); this.agregarOperacion("+"); },
+  restar() { this.verificarError(); this.agregarOperacion("-"); },
+  multiplicacion() { this.verificarError(); this.agregarOperacion("x"); },
+  division() { this.verificarError(); this.agregarOperacion("÷"); },
 
   verificarError() {
-    if (this.display.value === "Error") {
-      this.borrar_Pantalla();
-    }
+    if (this.display.value === "Error") this.borrar_Pantalla();
   },
 
   agregarOperacion(operador) {
@@ -137,17 +158,17 @@ const calculadora = {
     let end = display.selectionEnd;
     let texto = display.value;
 
-    if (/[+\-x*\/÷]$/.test(texto)) {
+    if (/[+\-x*\/÷%]$/.test(texto)) {
       texto = texto.slice(0, -1) + operador;
       display.value = texto;
-      display.setSelectionRange(texto.length, texto.length);
     } else {
       const nuevoTexto = texto.slice(0, start) + operador + texto.slice(end);
       display.value = nuevoTexto;
-      const nuevaPos = start + operador.length;
-      display.setSelectionRange(nuevaPos, nuevaPos);
     }
 
+    const nuevaPos = display.value.length;
+    display.setSelectionRange(nuevaPos, nuevaPos);
+    display.scrollLeft = display.scrollWidth;
     display.focus();
     this.nuevoNumero = false;
   },
@@ -156,15 +177,8 @@ const calculadora = {
     try {
       let expresion = this.display.value
         .replace(/x/g, "*")
-        .replace(/÷/g, "/");
-
-      const porcentaje = /(\d+\.?\d*)%(\d+\.?\d*)/;
-      while (porcentaje.test(expresion)) {
-        expresion = expresion.replace(
-          porcentaje,
-          (_, a, b) => `(${a}/100)*(${b})`
-        );
-      }
+        .replace(/÷/g, "/")
+        .replace(/(\d+\.?\d*)%/g, "($1/100)");
 
       const res = math.evaluate(expresion);
 
@@ -172,16 +186,16 @@ const calculadora = {
         this.display.value = "Error";
       } else {
         this.display.value = res;
-        this.display.setSelectionRange(
-          this.display.value.length,
-          this.display.value.length
-        );
+        this.display.setSelectionRange(this.display.value.length, this.display.value.length);
       }
 
       this.nuevoNumero = true;
+      this.display.scrollLeft = this.display.scrollWidth;
       this.display.focus();
     } catch {
       this.display.value = "Error";
     }
   }
 };
+
+calculadora.init();
