@@ -79,7 +79,24 @@ const calculadora = {
     display.focus();
   },
 
-  
+  decimal(){
+  const display = this.display;
+  let start = display.selectionStart;
+  let end = display.selectionEnd;
+  let texto = display.value;
+
+  const match = texto.slice(0, start).match(/(\d*\.?\d*)$/);
+  const numActual = match ? match[0] : "";
+
+  if (numActual.includes(".")) return;
+
+  const nuevoTexto = texto.slice(0, start) + "." + texto.slice(end);
+  const nuevaPos = start + 1;
+
+  display.value = nuevoTexto;
+  display.setSelectionRange(nuevaPos, nuevaPos);
+  display.focus();
+  },
   
 
   borrar_Pantalla() {
