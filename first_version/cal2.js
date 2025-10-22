@@ -14,10 +14,7 @@ const calculadora = {
       this.nuevoNumero = false;
     } else {
       this.display.value += valor;
-    }
-
-    this.display.scrollLeft = this.display.scrollWidth;
-
+    }       
   },
 
   borrar_Pantalla() {
@@ -101,8 +98,6 @@ const calculadora = {
     this.agregarOperacion("÷");
   },
 
-  
-
   verificarError() {
     if (this.display.value === "Error") {
       this.borrar_Pantalla();
@@ -123,6 +118,16 @@ const calculadora = {
       let expresion = this.display.value
         .replace(/x/g, "*")
         .replace(/÷/g, "/");
+
+        const porcentaje = /(\d+\.?\d*)%(\d+\.?\d*)/;
+
+         while (porcentaje.test(expresion)) {
+        expresion = expresion.replace(
+          porcentaje,
+          (_, a, b) => `(${a}/100)*(${b})`
+        );
+      }
+
       const res = math.evaluate(expresion);
       if (!isFinite(res) || isNaN(res)) {
         this.display.value = "Error";
