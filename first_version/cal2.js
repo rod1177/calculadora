@@ -4,46 +4,71 @@ const calculadora = {
   operacion: null,
   nuevoNumero: false,
 
-init() {
-  const display = this.display;
+  init() {
+    const display = this.display;
 
-   display.addEventListener("beforeinput", (e) => {
-    const data = e.data;
-    const valor = display.value;
-    const ultimo = valor.slice(-1);
+    display.addEventListener("beforeinput", (e) => {
+      const data = e.data;
+      const valor = display.value;
+      const start = display.selectionStart;
+      const end = display.selectionEnd;
+      const especiales = ["deleteContentBackward", "deleteContentForward"];
 
-     const especiales = ["deleteContentBackward", "deleteContentForward"];
-    if (!data && !especiales.includes(e.inputType)) return;
+      if (!data && !especiales.includes(e.inputType)) return;
 
-     if (e.inputType === "insertLineBreak") {
-      e.preventDefault();
-      this.resultado();
-      return;
-    }
+      if (e.inputType === "insertLineBreak") {
+        e.preventDefault();
+        this.resultado();
+        return;
+      }
 
-     const permitido = /[0-9+\-x÷*/.%]/.test(data);
-    if (!permitido && !especiales.includes(e.inputType)) {
-      e.preventDefault();
-      return;
-    }
+      const permitido = /[0-9+\-x÷*/.%]/.test(data);
+      if (!permitido && !especiales.includes(e.inputType)) {
+        e.preventDefault();
+        return;
+      }
 
-     if (/[+\-x÷*/]/.test(data) && /[+\-x÷*/]/.test(ultimo)) {
-      e.preventDefault();  
-      display.value = valor.slice(0, -1) + data;
-       display.setSelectionRange(display.value.length, display.value.length);
-      display.scrollLeft = display.scrollWidth;
-      return;
-    }
-  });
+      if (data === ".") {
+        const textoAntes = valor.slice(0, start);
+        const textoDespues = valor.slice(end);
+        const antesNumero = textoAntes.split(/[+\-x÷*/]/).pop() || "";
+        const despuesNumero = textoDespues.split(/[+\-x÷*/]/)[0] || "";
+        const numeroActual = antesNumero + despuesNumero;
 
-  display.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      this.resultado();
-    }
-  });
-},
+        if (numeroActual.includes(".")) {
+          e.preventDefault();
+          return;
+        }
 
+        if (antesNumero === "" && (textoAntes === "" || /[+\-x÷*/]$/.test(textoAntes))) {
+          e.preventDefault();
+          return;
+        }
+      }
+
+      if (/[+\-x÷*/]/.test(data)) {
+        const textoAntes = valor.slice(0, start);
+        const textoDespues = valor.slice(end);
+
+        if (/[+\-x÷*/]$/.test(textoAntes) || /^[+\-x÷*/]/.test(textoDespues)) {
+          e.preventDefault();
+          display.value =
+            textoAntes.replace(/[+\-x÷*/]$/, "") +
+            data +
+            textoDespues.replace(/^[+\-x÷*/]/, "");
+          display.setSelectionRange(start + 1, start + 1);
+          return;
+        }
+      }
+    });
+
+    display.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        this.resultado();
+      }
+    });
+  },
 
   escribe(valor) {
     const display = this.display;
@@ -116,6 +141,9 @@ init() {
     if (num === 0) return (this.display.value = "Error");
     const resultado = 1 / num;
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
+    const pos = this.display.value.length;
+    this.display.setSelectionRange(pos, pos);
+    this.display.focus();
   },
 
   elevacion_Cuadrado() {
@@ -124,6 +152,9 @@ init() {
     const num = parseFloat(match[1]);
     const resultado = num ** 2;
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
+    const pos = this.display.value.length;
+    this.display.setSelectionRange(pos, pos);
+    this.display.focus();
   },
 
   obtener_Raiz() {
@@ -133,6 +164,9 @@ init() {
     if (num < 0) return (this.display.value = "Error");
     const resultado = Math.sqrt(num);
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
+    const pos = this.display.value.length;
+    this.display.setSelectionRange(pos, pos);
+    this.display.focus();
   },
 
   invertir_signo() {
@@ -141,6 +175,9 @@ init() {
     const num = parseFloat(match[1]);
     const resultado = -num;
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
+    const pos = this.display.value.length;
+    this.display.setSelectionRange(pos, pos);
+    this.display.focus();
   },
 
   suma() { this.verificarError(); this.agregarOperacion("+"); },
@@ -182,14 +219,11 @@ init() {
 
       const res = math.evaluate(expresion);
 
-      if (!isFinite(res) || isNaN(res)) {
-        this.display.value = "Error";
-      } else {
-        this.display.value = res;
-        this.display.setSelectionRange(this.display.value.length, this.display.value.length);
-      }
+      if (!isFinite(res) || isNaN(res)) throw new Error();
 
+      this.display.value = res;
       this.nuevoNumero = true;
+      this.display.setSelectionRange(this.display.value.length, this.display.value.length);
       this.display.scrollLeft = this.display.scrollWidth;
       this.display.focus();
     } catch {
