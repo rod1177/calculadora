@@ -182,7 +182,6 @@ const calculadora = {
         this.display.value = "Error";
       } else {
         this.display.value = res;
-        // Cursor al final del resultado
         this.display.setSelectionRange(
           this.display.value.length,
           this.display.value.length
