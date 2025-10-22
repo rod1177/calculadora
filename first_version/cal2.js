@@ -28,24 +28,6 @@ const calculadora = {
         return;
       }
 
-      if (data === ".") {
-        const textoAntes = valor.slice(0, start);
-        const textoDespues = valor.slice(end);
-        const antesNumero = textoAntes.split(/[+\-x÷*/]/).pop() || "";
-        const despuesNumero = textoDespues.split(/[+\-x÷*/]/)[0] || "";
-        const numeroActual = antesNumero + despuesNumero;
-
-        if (numeroActual.includes(".")) {
-          e.preventDefault();
-          return;
-        }
-
-        if (antesNumero === "" && (textoAntes === "" || /[+\-x÷*/]$/.test(textoAntes))) {
-          e.preventDefault();
-          return;
-        }
-      }
-
       if (/[+\-x÷*/]/.test(data)) {
         const textoAntes = valor.slice(0, start);
         const textoDespues = valor.slice(end);
@@ -96,6 +78,7 @@ const calculadora = {
     display.scrollLeft = scrollPrev > 0 ? scrollPrev : display.scrollWidth;
     display.focus();
   },
+  
 
   borrar_Pantalla() {
     this.display.value = "";
