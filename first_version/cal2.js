@@ -58,7 +58,6 @@ const calculadora = {
     display.focus();
   },
 
-  // --- Porcentaje ---
   cal_Porcentaje() {
     const valor = this.display.value;
     if (valor.includes("%")) return;
@@ -66,7 +65,6 @@ const calculadora = {
     this.display.focus();
   },
 
-  // --- 1/x ---
   inversor() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -79,7 +77,6 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
-  // --- x² ---
   elevacion_Cuadrado() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -88,7 +85,6 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
-  // --- √x ---
   obtener_Raiz() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -101,7 +97,6 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
-  // --- Cambiar signo ---
   invertir_signo() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -110,7 +105,6 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
-  // --- Operaciones ---
   suma() {
     this.verificarError();
     this.agregarOperacion("+");
@@ -143,13 +137,11 @@ const calculadora = {
     let end = display.selectionEnd;
     let texto = display.value;
 
-    // Si ya hay un operador al final, reemplazarlo
     if (/[+\-x*\/÷]$/.test(texto)) {
       texto = texto.slice(0, -1) + operador;
       display.value = texto;
       display.setSelectionRange(texto.length, texto.length);
     } else {
-      // Insertar el operador en la posición del cursor
       const nuevoTexto = texto.slice(0, start) + operador + texto.slice(end);
       display.value = nuevoTexto;
       const nuevaPos = start + operador.length;
@@ -160,14 +152,12 @@ const calculadora = {
     this.nuevoNumero = false;
   },
 
-  // --- Calcular resultado ---
   resultado() {
     try {
       let expresion = this.display.value
         .replace(/x/g, "*")
         .replace(/÷/g, "/");
 
-      // Manejar expresiones tipo A%B → (A / 100) * B
       const porcentaje = /(\d+\.?\d*)%(\d+\.?\d*)/;
       while (porcentaje.test(expresion)) {
         expresion = expresion.replace(
