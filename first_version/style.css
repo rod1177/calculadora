@@ -25,7 +25,6 @@ body {
   border: none;
   caret-color: white;
   outline: none;
-  direction: ltr;
   overflow: hidden;
   white-space: nowrap;
 }
