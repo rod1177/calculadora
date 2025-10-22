@@ -5,16 +5,28 @@ const calculadora = {
   nuevoNumero: false,
 
   escribe(valor) {
-    if (this.display.value === "Error" || this.display.value === "0") {
-      this.display.value = "";
+    const display = this.display;
+    let start = display.selectionStart;
+    let end = display.selectionEnd;
+    let texto = display.value;
+
+    if (texto === "Error" || texto === "0") {
+      texto = "";
+      start = end = 0;
     }
 
-    if (this.nuevoNumero && /[+\-x÷*/]/.test(this.display.value.slice(-1)) === false) {
-      this.display.value = valor;
+    if (this.nuevoNumero && /[+\-x÷*/]/.test(texto.slice(-1)) === false) {
+      texto = "";
+      start = end = 0;
       this.nuevoNumero = false;
-    } else {
-      this.display.value += valor;
-    }       
+    }
+
+    const nuevoTexto = texto.slice(0, start) + valor + texto.slice(end);
+    display.value = nuevoTexto;
+
+    const nuevaPos = start + valor.length;
+    display.setSelectionRange(nuevaPos, nuevaPos);
+    display.focus();
   },
 
   borrar_Pantalla() {
@@ -25,19 +37,36 @@ const calculadora = {
   },
 
   borrar_Numero() {
-    if (this.display.value === "Error") {
+    const display = this.display;
+    let start = display.selectionStart;
+    let end = display.selectionEnd;
+    let texto = display.value;
+
+    if (texto === "Error") {
       this.borrar_Pantalla();
-    } else {
-      this.display.value = this.display.value.slice(0, -1);
+      return;
     }
+
+    if (start !== end) {
+      display.value = texto.slice(0, start) + texto.slice(end);
+      display.setSelectionRange(start, start);
+    } else if (start > "") {
+      display.value = texto.slice(0, start - 1) + texto.slice(end);
+      display.setSelectionRange(start - 1, start - 1);
+    }
+
+    display.focus();
   },
 
+  // --- Porcentaje ---
   cal_Porcentaje() {
     const valor = this.display.value;
     if (valor.includes("%")) return;
     this.display.value += "%";
+    this.display.focus();
   },
 
+  // --- 1/x ---
   inversor() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -50,6 +79,7 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
+  // --- x² ---
   elevacion_Cuadrado() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -58,6 +88,7 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
+  // --- √x ---
   obtener_Raiz() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -70,6 +101,7 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
+  // --- Cambiar signo ---
   invertir_signo() {
     const match = this.display.value.match(/(-?\d+\.?\d*)$/);
     if (!match) return;
@@ -78,6 +110,7 @@ const calculadora = {
     this.display.value = this.display.value.replace(/(-?\d+\.?\d*)$/, resultado);
   },
 
+  // --- Operaciones ---
   suma() {
     this.verificarError();
     this.agregarOperacion("+");
@@ -105,23 +138,38 @@ const calculadora = {
   },
 
   agregarOperacion(operador) {
-    if (/[+\-x*\/÷]$/.test(this.display.value)) {
-      this.display.value = this.display.value.slice(0, -1) + operador;
+    const display = this.display;
+    let start = display.selectionStart;
+    let end = display.selectionEnd;
+    let texto = display.value;
+
+    // Si ya hay un operador al final, reemplazarlo
+    if (/[+\-x*\/÷]$/.test(texto)) {
+      texto = texto.slice(0, -1) + operador;
+      display.value = texto;
+      display.setSelectionRange(texto.length, texto.length);
     } else {
-      this.display.value += operador;
+      // Insertar el operador en la posición del cursor
+      const nuevoTexto = texto.slice(0, start) + operador + texto.slice(end);
+      display.value = nuevoTexto;
+      const nuevaPos = start + operador.length;
+      display.setSelectionRange(nuevaPos, nuevaPos);
     }
+
+    display.focus();
     this.nuevoNumero = false;
   },
 
+  // --- Calcular resultado ---
   resultado() {
     try {
       let expresion = this.display.value
         .replace(/x/g, "*")
         .replace(/÷/g, "/");
 
-        const porcentaje = /(\d+\.?\d*)%(\d+\.?\d*)/;
-
-         while (porcentaje.test(expresion)) {
+      // Manejar expresiones tipo A%B → (A / 100) * B
+      const porcentaje = /(\d+\.?\d*)%(\d+\.?\d*)/;
+      while (porcentaje.test(expresion)) {
         expresion = expresion.replace(
           porcentaje,
           (_, a, b) => `(${a}/100)*(${b})`
@@ -129,12 +177,20 @@ const calculadora = {
       }
 
       const res = math.evaluate(expresion);
+
       if (!isFinite(res) || isNaN(res)) {
         this.display.value = "Error";
       } else {
         this.display.value = res;
+        // Cursor al final del resultado
+        this.display.setSelectionRange(
+          this.display.value.length,
+          this.display.value.length
+        );
       }
+
       this.nuevoNumero = true;
+      this.display.focus();
     } catch {
       this.display.value = "Error";
     }

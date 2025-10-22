@@ -23,9 +23,9 @@ body {
   text-align: right;
   margin-bottom: 5px;
   border: none;
-  scrollbar-width: thin;
   caret-color: white;
   outline: none;
+
 }
 
 .fila {
